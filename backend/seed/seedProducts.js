@@ -67,6 +67,20 @@ async function seed() {
     console.log("Admin user already exists, skipping.");
   }
 
+
+   const userEmail = "user@avocadofarm.test";
+  const existingUser = await User.findOne({ email: userEmail });
+
+  if (!existingUser) {
+    await User.create({
+      name: "Sanjay",
+      email: userEmail,
+      password: "123456",
+      role: "admin",
+    });
+    console.log("User created");
+  }
+
   await Product.deleteMany({});
   await Product.insertMany(sampleProducts);
   console.log(`Inserted ${sampleProducts.length} sample products.`);
