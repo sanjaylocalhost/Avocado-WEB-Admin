@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "https://avocado-web-admin-1.onrender.com/api";
+const baseURL = "https://avocado-web-admin-2.onrender.com/api";
 
 const api = axios.create({ baseURL });
 
