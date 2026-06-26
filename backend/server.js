@@ -2,10 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
+const uploadRoutes = require("./routes/upload");
 
 const app = express();
 
@@ -44,6 +46,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // ============ 404 HANDLER ============
 app.use("/api", (req, res) => {
