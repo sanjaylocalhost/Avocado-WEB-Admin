@@ -51,7 +51,7 @@ router.post("/", protect, adminOnly, upload.single("image"), (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
     
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const imageUrl = `/api/uploads/${req.file.filename}`;
     res.json({ 
       imageUrl: imageUrl,
       filename: req.file.filename,
