@@ -540,7 +540,7 @@ const staticProducts = [
     price: 25,
     unit: "per seed",
     stock: 400,
-    image: "/images/avocado-seed.jpg",
+    image: "/seeds 4.png",
     features: ["High germination rate", "Bulk available", "Freshly harvested"]
   },
   {
@@ -551,7 +551,7 @@ const staticProducts = [
     price: 350,
     unit: "per plant",
     stock: 150,
-    image: "/images/avocado-plant.jpg",
+    image: "/Plant 2.png",
     features: ["Strong root system", "Disease-free", "Farm-ready"]
   },
   {
@@ -562,7 +562,7 @@ const staticProducts = [
     price: 25,
     unit: "per seed",
     stock: 400,
-    image: "/images/fuerte-seed.jpg",
+    image: "/seeds 2.png",
     features: ["Cold tolerant", "Consistent fruiting"]
   }
 ];
@@ -637,9 +637,6 @@ export default function Home() {
   }, []);
 
   const displayProducts = useStatic ? staticProducts : featured;
-
-
-
 
   useEffect(() => {
     api
