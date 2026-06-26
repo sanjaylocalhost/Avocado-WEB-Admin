@@ -8,7 +8,7 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <AvocadoMark size={28} />
-            <span className="font-display text-lg text-cream">Greenstone Farm</span>
+            <span className="font-display text-lg text-cream">Meenakshi Plantation</span>
           </div>
           <p className="text-sm text-cream/70 max-w-xs">
             From seed to harvest, we support farmers and nursery owners with healthy avocado
@@ -38,9 +38,9 @@ export default function Footer() {
         <div>
           <h3 className="font-display text-base mb-3">Get in touch</h3>
           <ul className="space-y-2 text-sm text-cream/70">
-            <li>Greenstone Farm, Karnataka, India</li>
-            <li>+91 00000 00000</li>
-            <li>hello@greenstonefarm.example</li>
+            <li>Meenakshi Plantation, Karnataka, India</li>
+            <li>+91 98453 11238</li>
+            <li>admin@meenakshiplantation.com</li>
           </ul>
         </div>
       </div>

@@ -32,8 +32,13 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-line">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2">
-          <AvocadoMark size={32} />
-          <span className="font-display text-lg text-skin-dark">Greenstone Farm</span>
+          {/* <AvocadoMark size={32} /> */}
+           <img
+    src="/logo.png"
+    alt="Meenakshi Plantation Logo"
+    className="w-10 h-10 object-contain"
+  />
+          <span className="font-display text-lg text-skin-dark">Meenakshi Plantation</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-7">
