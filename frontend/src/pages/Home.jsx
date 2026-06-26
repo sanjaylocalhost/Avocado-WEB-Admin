@@ -524,11 +524,49 @@
 
 
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useStatic  } from "react";
 import api from "../services/api";
 import AvocadoMark from "../components/AvocadoMark";
 import SectionDivider from "../components/SectionDivider";
 import ProductCard from "../components/ProductCard";
+
+// Static products data
+const staticProducts = [
+  {
+    _id: "1",
+    name: "Premium Avocado Seed",
+    category: "seed",
+    description: "High-quality seeds with excellent germination rate, ideal for commercial farming.",
+    price: 25,
+    unit: "per seed",
+    stock: 400,
+    image: "/images/avocado-seed.jpg",
+    features: ["High germination rate", "Bulk available", "Freshly harvested"]
+  },
+  {
+    _id: "2",
+    name: "Grafted Hass Avocado Plant",
+    category: "plant",
+    description: "One-year-old grafted Hass sapling with strong root system.",
+    price: 350,
+    unit: "per plant",
+    stock: 150,
+    image: "/images/avocado-plant.jpg",
+    features: ["Strong root system", "Disease-free", "Farm-ready"]
+  },
+  {
+    _id: "3",
+    name: "Fuerte Avocado Seed",
+    category: "seed",
+    description: "Fuerte variety seeds known for cold tolerance and consistent fruiting.",
+    price: 25,
+    unit: "per seed",
+    stock: 400,
+    image: "/images/fuerte-seed.jpg",
+    features: ["Cold tolerant", "Consistent fruiting"]
+  }
+];
+
 
 const whyChooseUs = [
   "Quality seeds with high germination rates",
@@ -579,6 +617,29 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loadError, setLoadError] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [UseStatic,setUseStatic] = useState([]);
+
+  useEffect(() => {
+    api
+      .get("/products")
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setFeatured(res.data.slice(0, 3));
+          setUseStatic(false);
+        } else {
+          setUseStatic(true);
+        }
+      })
+      .catch(() => {
+        setLoadError(true);
+        setUseStatic(true); // Use static when API fails
+      });
+  }, []);
+
+  const displayProducts = useStatic ? staticProducts : featured;
+
+
+
 
   useEffect(() => {
     api
@@ -801,29 +862,118 @@ export default function Home() {
 
       {/* Featured products */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 bg-white/40 rounded-3xl">
-        <div className="flex items-end justify-between mb-8">
-          <h2 className="font-display text-3xl text-ink">Featured products</h2>
-          <Link to="/products" className="text-skin font-medium hover:underline">
-            View all →
-          </Link>
+  <div className="flex items-end justify-between mb-8">
+    <h2 className="font-display text-3xl text-ink">Featured products</h2>
+    <Link to="/products" className="text-skin font-medium hover:underline">
+      View all →
+    </Link>
+  </div>
+
+  {loadError && (
+    <p className="text-ink/60 text-sm">
+      Couldn't load live products right now — make sure the backend API is running.
+    </p>
+  )}
+
+  {!loadError && featured.length === 0 && (
+    <p className="text-ink/60 text-sm">No products published yet. Check back soon.</p>
+  )}
+
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {featured.map((p) => (
+      <ProductCard key={p._id} product={p} />
+    ))}
+    
+    {/* Static fallback products if no featured products */}
+    {featured.length === 0 && !loadError && (
+      <>
+        {/* Static Product 1 */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all group">
+          <div className="relative h-56 bg-gray-100 overflow-hidden">
+            <img
+              src="/images/avocado-seed-static.jpg"
+              alt="Avocado Seed"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/400x300/2d6a4f/ffffff?text=Avocado+Seed";
+              }}
+            />
+            <span className="absolute top-3 left-3 bg-skin/90 text-white text-xs px-3 py-1 rounded-full capitalize">
+              Seed
+            </span>
+          </div>
+          <div className="p-4">
+            <h3 className="font-display text-lg text-ink truncate">Premium Avocado Seed</h3>
+            <p className="text-ink/60 text-sm mt-1 line-clamp-2">High-quality seeds with excellent germination rate.</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-skin font-bold text-xl">₹25 <span className="text-sm font-normal text-ink/60">/per seed</span></p>
+              <span className="text-sm text-ink/60">Stock: 400</span>
+            </div>
+            <Link to="/products" className="mt-4 w-full block text-center px-4 py-2 bg-skin text-white rounded-lg hover:bg-skin-dark transition-colors text-sm font-medium">
+              View Details
+            </Link>
+          </div>
         </div>
 
-        {loadError && (
-          <p className="text-ink/60 text-sm">
-            Couldn't load live products right now — make sure the backend API is running.
-          </p>
-        )}
-
-        {!loadError && featured.length === 0 && (
-          <p className="text-ink/60 text-sm">No products published yet. Check back soon.</p>
-        )}
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featured.map((p) => (
-            <ProductCard key={p._id} product={p} />
-          ))}
+        {/* Static Product 2 */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all group">
+          <div className="relative h-56 bg-gray-100 overflow-hidden">
+            <img
+              src="/images/avocado-plant-static.jpg"
+              alt="Avocado Plant"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/400x300/2d6a4f/ffffff?text=Avocado+Plant";
+              }}
+            />
+            <span className="absolute top-3 left-3 bg-skin/90 text-white text-xs px-3 py-1 rounded-full capitalize">
+              Plant
+            </span>
+          </div>
+          <div className="p-4">
+            <h3 className="font-display text-lg text-ink truncate">Grafted Avocado Plant</h3>
+            <p className="text-ink/60 text-sm mt-1 line-clamp-2">Healthy grafted plant ready for transplantation.</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-skin font-bold text-xl">₹350 <span className="text-sm font-normal text-ink/60">/per plant</span></p>
+              <span className="text-sm text-ink/60">Stock: 150</span>
+            </div>
+            <Link to="/products" className="mt-4 w-full block text-center px-4 py-2 bg-skin text-white rounded-lg hover:bg-skin-dark transition-colors text-sm font-medium">
+              View Details
+            </Link>
+          </div>
         </div>
-      </section>
+
+        {/* Static Product 3 */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all group">
+          <div className="relative h-56 bg-gray-100 overflow-hidden">
+            <img
+              src="/images/hass-avocado-static.jpg"
+              alt="Hass Avocado"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/400x300/2d6a4f/ffffff?text=Hass+Avocado";
+              }}
+            />
+            <span className="absolute top-3 left-3 bg-skin/90 text-white text-xs px-3 py-1 rounded-full capitalize">
+              Seed
+            </span>
+          </div>
+          <div className="p-4">
+            <h3 className="font-display text-lg text-ink truncate">Hass Avocado Seed</h3>
+            <p className="text-ink/60 text-sm mt-1 line-clamp-2">Premium Hass seeds with high germination rate.</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-skin font-bold text-xl">₹25 <span className="text-sm font-normal text-ink/60">/per seed</span></p>
+              <span className="text-sm text-ink/60">Stock: 500</span>
+            </div>
+            <Link to="/products" className="mt-4 w-full block text-center px-4 py-2 bg-skin text-white rounded-lg hover:bg-skin-dark transition-colors text-sm font-medium">
+              View Details
+            </Link>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</section>
 
       {/* Benefits of avocado */}
       <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">

@@ -45,7 +45,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-cream/10 py-4 text-center text-xs text-cream/50">
-        © {new Date().getFullYear()} Greenstone Avocado Farm & Nursery. All rights reserved.
+        © {new Date().getFullYear()} Meenakshi Plantation & Nursery. All rights reserved.
       </div>
     </footer>
   );

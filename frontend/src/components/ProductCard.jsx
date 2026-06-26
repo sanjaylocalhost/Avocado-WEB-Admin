@@ -35,34 +35,45 @@
 // }
 
 
-// components/ProductCard.js
-import React from "react";
+// components/ProductCard.jsx
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { getImageUrl, getPlaceholderImage } from "../services/api";
 
 export default function ProductCard({ product }) {
-  // Debug: Log the image URL
+  // Use state to track image error - prevents infinite loop
+  const [imgError, setImgError] = useState(false);
+  
   const imageUrl = product.image ? getImageUrl(product.image) : null;
-  console.log(`Product: ${product.name}, Image URL:`, imageUrl);
+
+  console.log("Product:", product.name);
+console.log("Original:", product.image);
+console.log("Final URL:", imageUrl);
+  
+  // Use a simple fallback that won't cause infinite loop
+  const fallbackImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%232d6a4f'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='20'%3ENo Image%3C/text%3E%3C/svg%3E";
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all group">
       {/* Image Container */}
       <div className="relative h-56 bg-gray-100 overflow-hidden">
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <img
             src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
-            onError={(e) => {
-              console.error(`Failed to load image for ${product.name}:`, imageUrl);
-              e.target.src = getPlaceholderImage();
+            onError={() => {
+              // Only set error state - DO NOT try to load another image
+              setImgError(true);
             }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-            <span className="text-gray-500 text-sm">No Image</span>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-200">
+            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-gray-500 text-sm mt-2">No Image</span>
           </div>
         )}
         

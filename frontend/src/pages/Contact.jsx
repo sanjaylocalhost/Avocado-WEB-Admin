@@ -37,19 +37,19 @@ export default function Contact() {
         <dl className="mt-8 space-y-4 text-ink/80">
           <div>
             <dt className="font-mono text-xs uppercase tracking-wide text-seed">Location</dt>
-            <dd>Greenstone Farm, Karnataka, India</dd>
+            <dd>Meenakshi Plantation, Karnataka, India</dd>
           </div>
           <div>
             <dt className="font-mono text-xs uppercase tracking-wide text-seed">Phone</dt>
-            <dd>+91 00000 00000</dd>
+            <dd>+91 98453 11238</dd>
           </div>
           <div>
             <dt className="font-mono text-xs uppercase tracking-wide text-seed">Email</dt>
-            <dd>hello@greenstonefarm.example</dd>
+            <dd>admin@Meenakshi Plantation.com</dd>
           </div>
           <div>
             <dt className="font-mono text-xs uppercase tracking-wide text-seed">WhatsApp</dt>
-            <dd>+91 00000 00000</dd>
+            <dd>+91 98453 11238</dd>
           </div>
         </dl>
       </div>

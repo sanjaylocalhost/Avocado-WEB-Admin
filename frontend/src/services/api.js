@@ -32,31 +32,18 @@ api.interceptors.request.use((config) => {
 
 // Fixed: Get full image URL
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return null;
-  
-  // If it's already a full URL, return it
+  if (!imagePath) return getPlaceholderImage();
+
   if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
     return imagePath;
   }
-  
-  // If it starts with /uploads, add the base URL (without /api)
-  if (imagePath.startsWith("/uploads")) {
-    return `https://avocado-web-admin-2.onrender.com${imagePath}`;
-  }
-  
-  // If it's just a filename, construct the URL
-  if (!imagePath.includes("/")) {
-    return `https://avocado-web-admin-2.onrender.com/uploads/${imagePath}`;
-  }
-  
-  // Default: return as is
-  return imagePath;
+
+  return `${baseURL}${imagePath}`;
 };
 
 // Placeholder image
-export const getPlaceholderImage = () => {
-  return "https://via.placeholder.com/400x300/2d6a4f/ffffff?text=No+Image";
-};
+export const getPlaceholderImage = () =>
+  "https://dummyimage.com/400x300/2d6a4f/ffffff&text=No+Image";
 
 // Upload image function
 export const uploadImage = async (file) => {
