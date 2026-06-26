@@ -37,73 +37,80 @@
 
 // components/ProductCard.js
 import React from "react";
+import { Link } from "react-router-dom";
 import { getImageUrl, getPlaceholderImage } from "../services/api";
 
-export default function ProductCard({ product, onEdit, onDelete }) {
+export default function ProductCard({ product }) {
+  // Debug: Log the image URL
   const imageUrl = product.image ? getImageUrl(product.image) : null;
+  console.log(`Product: ${product.name}, Image URL:`, imageUrl);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1">
-      <div className="relative h-48 bg-gray-100">
-        <img
-          src={imageUrl || getPlaceholderImage()}
-          alt={product.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          onError={(e) => {
-            e.target.src = getPlaceholderImage();
-          }}
-        />
-        {!product.isActive && (
-          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-            Inactive
-          </span>
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all group">
+      {/* Image Container */}
+      <div className="relative h-56 bg-gray-100 overflow-hidden">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onError={(e) => {
+              console.error(`Failed to load image for ${product.name}:`, imageUrl);
+              e.target.src = getPlaceholderImage();
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+            <span className="text-gray-500 text-sm">No Image</span>
+          </div>
         )}
-        <span className="absolute top-2 left-2 bg-skin/90 text-white text-xs px-2 py-1 rounded-full capitalize">
+        
+        {/* Category Badge */}
+        <span className="absolute top-3 left-3 bg-skin/90 text-white text-xs px-3 py-1 rounded-full capitalize">
           {product.category}
         </span>
+        
+        {/* Stock Badge */}
+        {product.stock === 0 && (
+          <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full">
+            Out of Stock
+          </span>
+        )}
       </div>
       
+      {/* Product Info */}
       <div className="p-4">
         <h3 className="font-display text-lg text-ink truncate">{product.name}</h3>
-        <p className="text-skin font-bold mt-1">
-          ₹{product.price} <span className="text-sm font-normal text-ink/60">/{product.unit}</span>
-        </p>
-        <p className="text-sm text-ink/60 mt-1">Stock: {product.stock}</p>
+        <p className="text-ink/60 text-sm mt-1 line-clamp-2">{product.description}</p>
         
+        <div className="flex items-center justify-between mt-3">
+          <p className="text-skin font-bold text-xl">
+            ₹{product.price} <span className="text-sm font-normal text-ink/60">/{product.unit}</span>
+          </p>
+          <span className="text-sm text-ink/60">Stock: {product.stock}</span>
+        </div>
+        
+        {/* Features */}
         {product.features && product.features.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {product.features.slice(0, 3).map((feature, index) => (
-              <span key={index} className="text-xs bg-skin/10 text-skin px-2 py-1 rounded-full truncate max-w-full">
+            {product.features.slice(0, 2).map((feature, index) => (
+              <span key={index} className="text-xs bg-skin/10 text-skin px-2 py-1 rounded-full">
                 {feature}
               </span>
             ))}
-            {product.features.length > 3 && (
-              <span className="text-xs text-ink/60">+{product.features.length - 3}</span>
+            {product.features.length > 2 && (
+              <span className="text-xs text-ink/60">+{product.features.length - 2} more</span>
             )}
           </div>
         )}
         
-        {(onEdit || onDelete) && (
-          <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(product)}
-                className="flex-1 px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
-              >
-                Edit
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(product._id)}
-                className="flex-1 px-3 py-1 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        )}
+        <Link 
+          to={`/products/${product._id}`}
+          className="mt-4 w-full block text-center px-4 py-2 bg-skin text-white rounded-lg hover:bg-skin-dark transition-colors text-sm font-medium"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );
