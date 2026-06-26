@@ -12,7 +12,7 @@ export default function About() {
     <div>
       <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 text-center">
         <AvocadoMark size={64} className="mx-auto mb-4" />
-        <h1 className="font-display text-4xl text-ink">About Greenstone Farm</h1>
+        <h1 className="font-display text-4xl text-ink">About Meenakshi Plantation</h1>
         <p className="text-ink/70 mt-5 leading-relaxed max-w-2xl mx-auto">
           We specialise in cultivating, growing, and supplying premium-quality avocado
           seeds and healthy avocado plants. With a passion for sustainable agriculture and

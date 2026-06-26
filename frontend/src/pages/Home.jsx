@@ -588,27 +588,27 @@ const benefits = [
 const heroImages = [
   {
     id: 1,
-    src: "public/first page 1.png",
+    src: "/public/first page 1.png",
     alt: "Avocado farm with healthy trees"
   },
   {
     id: 2,
-    src: "public/first page 2.png",
+    src: "/public/first page 2.png",
     alt: "Premium avocado seeds"
   },
   {
     id: 3,
-    src: "public/first page 3.png",
+    src: "/public/first page 3.png",
     alt: "Avocado nursery plants"
   },
   {
     id: 4,
-    src: "public/first page 4.png",
+    src: "/public/first page 4.png",
     alt: "Fresh avocado harvest"
   },
   {
     id: 5,
-    src: "public/first page 1.png",
+    src: "/public/first page 1.png",
     alt: "Lush avocado orchard"
   }
 ];
