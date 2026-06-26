@@ -40,7 +40,7 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${req.ip}`);
   next();
 });
-
+   
 // ============ ROUTES ============
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Avocado farm API is running" });
