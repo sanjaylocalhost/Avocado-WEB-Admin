@@ -47,38 +47,38 @@ const categories = [
   { 
     id: "farm-photos", 
     name: "Farm photos", 
-    image: "public/Plant 1.png",
-    fallback: "🌳"
+    image: "/Plantone.png",
+    
   },
   { 
     id: "nursery-plants", 
     name: "Nursery plants", 
-    image: "public/nursery 1.png",
-    fallback: "🌱"
+    image: "/nurseryone.png",
+    
   },
   { 
     id: "seed-collection", 
     name: "Seed collection", 
-    image: "public/seeds 2.png",
-    fallback: "🌰"
+    image: "/seedstwo.png",
+   
   },
   { 
     id: "plantation-activities", 
     name: "Plantation activities", 
-    image: "public/Plant 3.png",
-    fallback: "🌾"
+    image: "/Plantthree.png",
+    
   },
   { 
     id: "harvest-photos", 
     name: "Harvest photos", 
-    image: "public/pLANT 1.png",
-    fallback: "🥑"
+    image: "/Plantone.png",
+    
   },
   { 
     id: "team-at-work", 
     name: "Team at work", 
-    image: "public/nursery3.png",
-    fallback: "👨‍🌾"
+    image: "/nurserythree.png",
+    
   },
 ];
 
