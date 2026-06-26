@@ -12,17 +12,16 @@ const uploadRoutes = require("./routes/upload");
 const app = express();
 
 // ============ IMPROVED CORS CONFIGURATION ============
-// Get origins from env or use defaults
 const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
   .split(",")
-  .map(origin => origin.trim()); // Trim whitespace
+  .map(origin => origin.trim());
 
 console.log("CORS allowed origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: "*",
-    credentials: true, // Allow cookies/auth headers
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -31,6 +30,10 @@ app.use(
 // ============ MIDDLEWARE ============
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ FIX: Serve static files from uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log('📁 Uploads folder path:', path.join(__dirname, 'uploads'));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -67,7 +70,6 @@ app.use((err, req, res, next) => {
     body: req.body
   });
   
-  // Handle specific error types
   if (err.message === "Not allowed by CORS") {
     return res.status(403).json({ 
       message: "CORS policy blocked this request",
@@ -108,7 +110,6 @@ process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
   process.exit(1);
 });
-
 
 
 
