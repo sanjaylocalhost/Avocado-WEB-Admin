@@ -1,9 +1,11 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
+import Layout from "./components/Layout";
 
+// Public Pages
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Products from "./pages/Products";
@@ -15,8 +17,13 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+
+// Admin Pages
+import AdminDashboard from "./pages/AdminDashboard";
+import Leads from "./pages/Leads";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
@@ -24,6 +31,7 @@ export default function App() {
       <Navbar />
       <main className="flex-1">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
@@ -33,6 +41,8 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
+          {/* User Dashboard - Private Route */}
           <Route
             path="/dashboard"
             element={
@@ -41,15 +51,42 @@ export default function App() {
               </PrivateRoute>
             }
           />
+          
+          {/* Admin Login */}
           <Route path="/admin/login" element={<AdminLogin />} />
+          
+          {/* Admin Routes with Sidebar Layout */}
           <Route
             path="/admin"
             element={
               <AdminRoute>
-                <AdminDashboard />
+                <Layout />
               </AdminRoute>
             }
-          />
+          >
+            {/* Default admin dashboard redirect */}
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            
+            {/* Admin Dashboard */}
+            <Route path="dashboard" element={<Dashboard />} />
+            
+            {/* Admin Products Management */}
+            <Route path="products" element={<AdminDashboard />} />
+            
+            {/* Admin Leads Management */}
+            <Route path="leads" element={<Leads />} />
+            
+            {/* Admin Inquiries */}
+            <Route path="inquiries" element={<AdminDashboard />} />
+            
+            {/* Admin Analytics */}
+            <Route path="analytics" element={<Analytics />} />
+            
+            {/* Admin Settings */}
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          
+          {/* 404 Not Found */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
