@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import PrivateRoute from "./components/PrivateRoute";
@@ -13,10 +14,9 @@ import ProductDetail from "./pages/ProductDetail";
 import Farming from "./pages/Farming";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
-import Login from "./pages/Login";
+import Login from "./pages/Login"; // This now handles both user and admin login
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -39,10 +39,10 @@ export default function App() {
           <Route path="/farming" element={<Farming />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} /> {/* Single login page */}
           <Route path="/signup" element={<Signup />} />
           
-          {/* User Dashboard - Private Route */}
+          {/* User Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -51,9 +51,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-          
-          {/* Admin Login */}
-          <Route path="/admin/login" element={<AdminLogin />} />
           
           {/* Admin Routes with Sidebar Layout */}
           <Route
@@ -64,25 +61,12 @@ export default function App() {
               </AdminRoute>
             }
           >
-            {/* Default admin dashboard redirect */}
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            
-            {/* Admin Dashboard */}
-            <Route path="dashboard" element={<Dashboard />} />
-            
-            {/* Admin Products Management */}
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="products" element={<AdminDashboard />} />
-            
-            {/* Admin Leads Management */}
             <Route path="leads" element={<Leads />} />
-            
-            {/* Admin Inquiries */}
             <Route path="inquiries" element={<AdminDashboard />} />
-            
-            {/* Admin Analytics */}
             <Route path="analytics" element={<Analytics />} />
-            
-            {/* Admin Settings */}
             <Route path="settings" element={<Settings />} />
           </Route>
           
