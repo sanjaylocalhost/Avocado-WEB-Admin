@@ -13,16 +13,19 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     const storedAdmin = localStorage.getItem("admin");
     
-    if (storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
-    }
-    
     if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
       if (storedAdmin) {
+        try {
+          setAdmin(JSON.parse(storedAdmin));
+        } catch (e) {
+          console.error("Error parsing stored admin:", e);
+          localStorage.removeItem("admin");
+        }
         setLoading(false);
       } else {
+        // Verify user token
         api
           .get("/auth/me")
           .then((res) => {
@@ -30,7 +33,8 @@ export function AuthProvider({ children }) {
               setUser(res.data.user);
             }
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error("Token verification failed:", error);
             localStorage.removeItem("token");
             delete api.defaults.headers.common["Authorization"];
           })
@@ -43,37 +47,52 @@ export function AuthProvider({ children }) {
 
   // Regular user login
   const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    const { token, user } = res.data;
-    localStorage.setItem("token", token);
-    localStorage.removeItem("admin");
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user);
-    setAdmin(null);
-    return res.data;
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.removeItem("admin");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setUser(user);
+      setAdmin(null);
+      return res.data;
+    } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
+      throw error;
+    }
   };
 
   // Admin login - uses separate endpoint
   const adminLogin = async (email, password) => {
-    const res = await api.post("/auth/admin/login", { email, password });
-    const { token, admin } = res.data;
-    localStorage.setItem("token", token);
-    localStorage.setItem("admin", JSON.stringify(admin));
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setAdmin(admin);
-    setUser(null);
-    return res.data;
+    try {
+      const res = await api.post("/auth/admin/login", { email, password });
+      const { token, admin } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("admin", JSON.stringify(admin));
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setAdmin(admin);
+      setUser(null);
+      return res.data;
+    } catch (error) {
+      console.error("Admin login error:", error.response?.data || error.message);
+      throw error;
+    }
   };
 
   const signup = async (userData) => {
-    const res = await api.post("/auth/signup", userData);
-    const { token, user } = res.data;
-    localStorage.setItem("token", token);
-    localStorage.removeItem("admin");
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user);
-    setAdmin(null);
-    return res.data;
+    try {
+      const res = await api.post("/auth/signup", userData);
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.removeItem("admin");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setUser(user);
+      setAdmin(null);
+      return res.data;
+    } catch (error) {
+      console.error("Signup error:", error.response?.data || error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
