@@ -1,13 +1,20 @@
-require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 const cors = require("cors");
-const connectDB = require("./config/db");
 const path = require("path");
+
+// Import database connection
+const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
 const uploadRoutes = require("./routes/upload");
+const leadRoutes = require("./routes/leadRoutes");
+
+// Load environment variables FIRST
+dotenv.config();
 
 const app = express();
 
@@ -18,9 +25,10 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
 
 console.log("CORS allowed origins:", allowedOrigins);
 
+// Use the allowed origins properly
 app.use(
   cors({
-    origin: "*",
+    origin:"*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -28,33 +36,49 @@ app.use(
 );
 
 // ============ MIDDLEWARE ============
+// Parse JSON bodies
 app.use(express.json());
+
+// Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ FIX: Serve static files from uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve uploaded images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 console.log('📁 Uploads folder path:', path.join(__dirname, 'uploads'));
 
-// Request logging middleware
+// ============ DATABASE CONNECTION ============
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI is not set. Add it to your .env file.");
+  process.exit(1);
+}
+
+// ============ REQUEST LOGGING MIDDLEWARE ============
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${req.ip}`);
   next();
 });
-   
+
 // ============ ROUTES ============
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Avocado farm API is running" });
+  res.json({ 
+    status: "ok", 
+    message: "Avocado farm API is running",
+    timestamp: new Date().toISOString()
+  });
 });
 
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/leads", leadRoutes);
 
 // ============ 404 HANDLER ============
 app.use("/api", (req, res) => {
   console.log(`404 - Route not found: ${req.method} ${req.path}`);
   res.status(404).json({ 
+    success: false,
     message: "Route not found",
     path: req.path 
   });
@@ -64,20 +88,42 @@ app.use("/api", (req, res) => {
 app.use((err, req, res, next) => {
   console.error("Error details:", {
     message: err.message,
-    stack: err.stack,
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     path: req.path,
     method: req.method,
     body: req.body
   });
   
+  // Handle CORS errors
   if (err.message === "Not allowed by CORS") {
     return res.status(403).json({ 
+      success: false,
       message: "CORS policy blocked this request",
       error: err.message 
     });
   }
   
-  res.status(500).json({ 
+  // Handle Mongoose validation errors
+  if (err.name === "ValidationError") {
+    return res.status(400).json({
+      success: false,
+      message: "Validation Error",
+      errors: Object.values(err.errors).map(e => e.message)
+    });
+  }
+  
+  // Handle duplicate key errors
+  if (err.code === 11000) {
+    return res.status(400).json({
+      success: false,
+      message: "Duplicate field value entered",
+      field: Object.keys(err.keyPattern)[0]
+    });
+  }
+  
+  // Default error response
+  res.status(err.status || 500).json({ 
+    success: false,
     message: process.env.NODE_ENV === "development" 
       ? err.message 
       : "Something went wrong on the server"
@@ -87,12 +133,14 @@ app.use((err, req, res, next) => {
 // ============ START SERVER ============
 const PORT = process.env.PORT || 5000;
 
+// Connect to database and start server
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
       console.log(`🔗 Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`📊 CORS enabled for: ${allowedOrigins.join(", ")}`);
     });
   })
   .catch((error) => {
@@ -100,9 +148,12 @@ connectDB()
     process.exit(1);
   });
 
+// ============ PROCESS HANDLERS ============
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (error) => {
   console.error("Unhandled Rejection:", error);
+  // Close server and exit gracefully
+  process.exit(1);
 });
 
 // Handle uncaught exceptions
@@ -111,46 +162,13 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
+// Handle graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received. Closing server...");
+  process.exit(0);
+});
 
-
-// require("dotenv").config();
-// const express = require("express");
-// const cors = require("cors");
-// const connectDB = require("./config/db");
-
-// const authRoutes = require("./routes/authRoutes");
-// const productRoutes = require("./routes/productRoutes");
-// const inquiryRoutes = require("./routes/inquiryRoutes");
-
-// const app = express();
-
-// const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173").split(",");
-// app.use(cors({ origin: allowedOrigins }));
-// app.use(express.json());
-
-// app.get("/api/health", (req, res) => {
-//   res.json({ status: "ok", message: "Avocado farm API is running" });
-// });
-
-// app.use("/api/auth", authRoutes);
-// app.use("/api/products", productRoutes);
-// app.use("/api/inquiries", inquiryRoutes);
-
-// // 404 handler for unknown API routes
-// app.use("/api", (req, res) => {
-//   res.status(404).json({ message: "Route not found" });
-// });
-
-// // Generic error handler
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).json({ message: "Something went wrong on the server" });
-// });
-
-// const PORT = process.env.PORT || 5000;
-
-// connectDB().then(() => {
-//   app.listen(PORT, () => {
-//     console.log(`Server running on http://localhost:${PORT}`);
-//   });
-// });
+process.on("SIGINT", () => {
+  console.log("SIGINT received. Closing server...");
+  process.exit(0);
+});
