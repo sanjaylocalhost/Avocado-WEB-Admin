@@ -1,3 +1,4 @@
+// routes/authRoutes.js
 const express = require("express");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
@@ -16,6 +17,60 @@ function publicUser(user) {
   };
 }
 
+// POST /api/auth/signup - customer signup
+router.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password, phone, location } = req.body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    // Create new user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      location,
+      role: "user",
+    });
+
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: publicUser(user),
+    });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Signup failed",
+      error: err.message,
+    });
+  }
+});
+
 // POST /api/auth/login - customer login
 router.post("/login", async (req, res) => {
   try {
@@ -28,17 +83,29 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // ✅ FIXED: Find user and select password
     const user = await User.findOne({
       email: email.toLowerCase(),
+      role: "user", // Ensure we only find regular users, not admins
     }).select("+password");
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
       });
     }
 
+    // ✅ FIXED: Compare password using instance method
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Generate token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -51,6 +118,7 @@ router.post("/login", async (req, res) => {
       user: publicUser(user),
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({
       success: false,
       message: "Login failed",

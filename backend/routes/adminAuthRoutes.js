@@ -4,6 +4,7 @@ const router = express.Router();
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 
+// POST /api/auth/admin/login - Admin login
 router.post("/admin/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -35,7 +36,7 @@ router.post("/admin/login", async (req, res) => {
       });
     }
 
-    // Verify password
+    // ✅ FIXED: Compare password using instance method, not model method
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -48,36 +49,17 @@ router.post("/admin/login", async (req, res) => {
     admin.lastLogin = new Date();
     await admin.save();
 
-    // ✅ Make sure JWT_SECRET is available
-    if (!process.env.JWT_SECRET) {
-      console.error("❌ JWT_SECRET is not set in environment variables");
-      return res.status(500).json({
-        success: false,
-        message: "Server configuration error: JWT secret missing",
-      });
-    }
-
     // Generate token
     const token = jwt.sign(
       { id: admin._id, role: "admin" },
-      process.env.JWT_SECRET,  // ✅ This must have a value
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.status(200).json({
       success: true,
       token,
-      admin: {
-        id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        phone: admin.phone,
-        role: admin.role,
-        permissions: admin.permissions,
-        isActive: admin.isActive,
-        lastLogin: admin.lastLogin,
-        createdAt: admin.createdAt,
-      },
+      admin: admin.toPublicJSON(),
     });
 
   } catch (err) {
@@ -87,6 +69,27 @@ router.post("/admin/login", async (req, res) => {
       message: "Admin login failed",
       error: err.message,
     });
+  }
+});
+
+// ✅ ADD: Get current admin endpoint
+router.get("/admin/me", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const admin = await Admin.findById(decoded.id);
+    
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    res.json({ success: true, admin: admin.toPublicJSON() });
+  } catch (err) {
+    res.status(401).json({ success: false, message: "Invalid token" });
   }
 });
 

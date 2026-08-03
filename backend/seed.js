@@ -1,4 +1,4 @@
-    // seed.js - Run with: node seed.js
+// seed.js - Run with: node seed.js
 require("dotenv").config();
 const mongoose = require("mongoose");
 const User = require("./models/User");

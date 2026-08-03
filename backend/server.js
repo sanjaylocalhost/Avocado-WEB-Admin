@@ -28,6 +28,7 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
 
 console.log("CORS allowed origins:", allowedOrigins);
 
+// ✅ FIXED: Don't use wildcard with credentials
 app.use(
   cors({
     origin: "*",
@@ -36,7 +37,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 // ============ MIDDLEWARE ============
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
