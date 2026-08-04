@@ -1,4 +1,5 @@
 
+
 // import { Link, NavLink, useNavigate } from "react-router-dom";
 // import { useState, useEffect } from "react";
 // import AvocadoMark from "./AvocadoMark";
@@ -255,18 +256,11 @@
 //         </div>
 //       )}
 
-//       {/* ORIGINAL NAVBAR */}
-//       <header className={`sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-line transition-all duration-300 ${
-//         isSaleBannerVisible ? "" : ""
-//       }`}>
-//         {/* ... rest of your navbar code remains the same ... */}
+//       {/* NAVBAR */}
+//       <header className={`sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-line transition-all duration-300`}>
 //         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
 //           <Link to="/" className="flex items-center gap-2">
-//             <img
-//               src="/logo.png"
-//               alt="Meenakshi Plantation Logo"
-//               className="w-10 h-10 object-contain"
-//             />
+//             <AvocadoMark className="w-10 h-10" />
 //             <span className="font-display text-lg text-skin-dark">Meenakshi Plantation</span>
 //           </Link>
 
@@ -281,30 +275,37 @@
 //           <div className="hidden md:flex items-center gap-4">
 //             {user ? (
 //               <>
-//                 <Link
-//                   to={isAdmin ? "/admin" : "/dashboard"}
-//                   className="text-sm font-medium text-ink/70 hover:text-skin"
-//                 >
-//                   {isAdmin ? "Admin panel" : "My account"}
-//                 </Link>
+//                 {/* Only show Admin panel link if user is admin */}
+//                 {isAdmin && (
+//                   <Link
+//                     to="/admin/dashboard"
+//                     className="text-sm font-medium px-4 py-2 rounded-full bg-seed text-cream hover:bg-seed-dark transition-colors"
+//                   >
+//                     🛡️ Admin Panel
+//                   </Link>
+//                 )}
+//                 {/* Show Dashboard link for regular users */}
+//                 {!isAdmin && (
+//                   <Link
+//                     to="/dashboard"
+//                     className="text-sm font-medium text-ink/70 hover:text-skin transition-colors"
+//                   >
+//                     📊 My Dashboard
+//                   </Link>
+//                 )}
 //                 <button
 //                   onClick={handleLogout}
-//                   className="text-sm font-medium px-4 py-2 rounded-full border border-skin text-skin hover:bg-skin hover:text-cream transition-colors"
+//                   className="text-sm font-medium px-4 py-2 rounded-full border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-colors"
 //                 >
 //                   Log out
 //                 </button>
 //               </>
 //             ) : (
 //               <>
-//                 <Link to="/login" className="text-sm font-medium text-ink/70 hover:text-skin">
+//                 <Link to="/login" className="text-sm font-medium text-ink/70 hover:text-skin transition-colors">
 //                   Log in
 //                 </Link>
-//                 <Link
-//                   to="/signup"
-//                   className="text-sm font-medium px-4 py-2 rounded-full bg-skin text-cream hover:bg-skin-dark transition-colors"
-//                 >
-//                   Create account
-//                 </Link>
+//                 {/* Removed Create account button */}
 //               </>
 //             )}
 //           </div>
@@ -338,21 +339,25 @@
 //               <hr className="border-line" />
 //               {user ? (
 //                 <>
-//                   <Link to={isAdmin ? "/admin" : "/dashboard"} onClick={() => setOpen(false)}>
-//                     {isAdmin ? "Admin panel" : "My account"}
-//                   </Link>
-//                   <button onClick={handleLogout} className="text-left text-skin font-medium">
+//                   {isAdmin ? (
+//                     <Link to="/admin/dashboard" onClick={() => setOpen(false)} className="text-seed font-medium">
+//                       🛡️ Admin Panel
+//                     </Link>
+//                   ) : (
+//                     <Link to="/dashboard" onClick={() => setOpen(false)} className="text-skin font-medium">
+//                       📊 My Dashboard
+//                     </Link>
+//                   )}
+//                   <button onClick={handleLogout} className="text-left text-red-600 font-medium">
 //                     Log out
 //                   </button>
 //                 </>
 //               ) : (
 //                 <>
-//                   <Link to="/login" onClick={() => setOpen(false)}>
+//                   <Link to="/login" onClick={() => setOpen(false)} className="text-skin font-medium">
 //                     Log in
 //                   </Link>
-//                   <Link to="/signup" onClick={() => setOpen(false)} className="text-skin font-medium">
-//                     Create account
-//                   </Link>
+//                   {/* Removed Create account link */}
 //                 </>
 //               )}
 //             </nav>
@@ -364,6 +369,7 @@
 // }
 
 
+// components/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AvocadoMark from "./AvocadoMark";
@@ -448,7 +454,7 @@ const saleAds = [
   },
 ];
 
-export default function Navbar() {
+export default function Navbar({ isAdminMode = false }) {
   const [open, setOpen] = useState(false);
   const [isSaleBannerVisible, setIsSaleBannerVisible] = useState(true);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
@@ -470,18 +476,20 @@ export default function Navbar() {
     setIsSaleBannerVisible(false);
   }
 
-  // Auto-rotate ads every 5 seconds
+  // Auto-rotate ads every 5 seconds (only if not in admin mode)
   useEffect(() => {
-    if (isSaleBannerVisible) {
+    if (isSaleBannerVisible && !isAdminMode) {
       const interval = setInterval(() => {
         setCurrentAdIndex((prev) => (prev + 1) % saleAds.length);
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [isSaleBannerVisible]);
+  }, [isSaleBannerVisible, isAdminMode]);
 
   // Timer for the first ad only
   useEffect(() => {
+    if (isAdminMode) return; // Don't run timer in admin mode
+    
     const totalSeconds = 2 * 24 * 60 * 60;
     let remainingSeconds = totalSeconds;
 
@@ -501,7 +509,7 @@ export default function Navbar() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [isAdminMode]);
 
   // Manual navigation
   const goToAd = (index) => {
@@ -510,6 +518,40 @@ export default function Navbar() {
 
   const currentAd = saleAds[currentAdIndex];
 
+  // If in admin mode, show simplified navbar without sale banners
+  if (isAdminMode) {
+    return (
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/admin/dashboard" className="flex items-center gap-2">
+              <span className="text-2xl">🌿</span>
+              <span className="text-lg font-bold text-gray-800 hidden sm:block">Meenakshi Admin</span>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500 hidden md:inline">
+              {user?.email || "Admin"}
+            </span>
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+              <span className="text-white font-medium text-sm">
+                {user?.name?.[0] || user?.email?.[0] || "A"}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:text-red-700 transition-colors px-3 py-1 rounded-lg hover:bg-red-50"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // Regular navbar with sale banners for public site
   return (
     <>
       {/* SALE ANNOUNCEMENT BANNER - ABOVE NAVBAR */}
@@ -526,7 +568,7 @@ export default function Navbar() {
             {/* Main Content */}
             <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
               {/* Left: Icon & Badge */}
-              <div className=" flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <span className="text-xl md:text-2xl animate-bounce">{currentAd.icon}</span>
                 <span className="border border-white text-current font-extrabold px-3 py-0.5 rounded-full text-xs md:text-sm animate-pulse shadow-lg">
                   {currentAd.badge}
@@ -669,7 +711,6 @@ export default function Navbar() {
                 <Link to="/login" className="text-sm font-medium text-ink/70 hover:text-skin transition-colors">
                   Log in
                 </Link>
-                {/* Removed Create account button */}
               </>
             )}
           </div>
@@ -721,7 +762,6 @@ export default function Navbar() {
                   <Link to="/login" onClick={() => setOpen(false)} className="text-skin font-medium">
                     Log in
                   </Link>
-                  {/* Removed Create account link */}
                 </>
               )}
             </nav>

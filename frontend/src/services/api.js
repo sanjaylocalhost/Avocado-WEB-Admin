@@ -18,9 +18,9 @@
 // services/api.js
 import axios from "axios";
 
-const baseURL = "https://avocado-web-admin-2.onrender.com/api";
+// const baseURL = "https://avocado-web-admin-2.onrender.com/api";
 
-// const baseURL = "http://localhost:5000/api";
+const baseURL = "http://localhost:5000/api";
 
 const api = axios.create({ baseURL });
  

@@ -1,109 +1,171 @@
-// context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import api from "../services/api";
+import axios from "axios"; // 👈 ADD THIS IMPORT
 
 const AuthContext = createContext(null);
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; // 👈 ADD THIS
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const initialized = useRef(false);
 
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    
     const token = localStorage.getItem("token");
-    const storedAdmin = localStorage.getItem("admin");
+    console.log("🔍 AuthProvider - Token found:", !!token);
     
     if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
+      const storedAdmin = localStorage.getItem("admin");
       if (storedAdmin) {
         try {
-          setAdmin(JSON.parse(storedAdmin));
+          const adminData = JSON.parse(storedAdmin);
+          console.log("✅ Stored admin found:", adminData);
+          setAdmin(adminData);
+          setLoading(false);
+          return;
         } catch (e) {
           console.error("Error parsing stored admin:", e);
           localStorage.removeItem("admin");
         }
-        setLoading(false);
-      } else {
-        // Verify user token
-        api
-          .get("/auth/me")
-          .then((res) => {
-            if (res.data.success) {
-              setUser(res.data.user);
-            }
-          })
-          .catch((error) => {
-            console.error("Token verification failed:", error);
-            localStorage.removeItem("token");
-            delete api.defaults.headers.common["Authorization"];
-          })
-          .finally(() => setLoading(false));
       }
+      
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          console.log("✅ Stored user found:", userData);
+          setUser(userData);
+          setLoading(false);
+          return;
+        } catch (e) {
+          console.error("Error parsing stored user:", e);
+          localStorage.removeItem("user");
+        }
+      }
+      
+      verifyToken();
     } else {
+      console.log("🔍 No token found, setting loading to false");
       setLoading(false);
     }
   }, []);
 
-  // Regular user login
-  const login = async (email, password) => {
+  const verifyToken = useCallback(async () => {
+    try {
+      const res = await api.get("/auth/me");
+      console.log("🔍 Token verification response:", res.data);
+      
+      if (res.data.success) {
+        const userData = res.data.user;
+        if (userData.role === "admin") {
+          setAdmin(userData);
+          localStorage.setItem("admin", JSON.stringify(userData));
+        } else {
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error("Token verification failed:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("admin");
+      localStorage.removeItem("user");
+      delete api.defaults.headers.common["Authorization"];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const adminLogin = useCallback(async (email, password) => {
+  try {
+    console.log("🔑 Attempting admin login for:", email);
+    
+    // ✅ FIXED: Match your backend route exactly
+    const response = await axios.post(`${API_URL}/auth/admin/login`, { email, password });
+    console.log("📦 Admin login response:", response.data);
+    
+    if (response.data.success) {
+      const { token, admin: adminData } = response.data;
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("admin", JSON.stringify(adminData));
+      localStorage.removeItem("user");
+      
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      console.log("👤 Admin data:", adminData);
+      setAdmin(adminData);
+      setUser(null);
+      
+      console.log("✅ Admin state updated:", adminData);
+      return response.data;
+    }
+  } catch (error) {
+    console.error("❌ Admin login error:", error);
+    throw error;
+  }
+}, []);
+
+  const login = useCallback(async (email, password) => {
     try {
       const res = await api.post("/auth/login", { email, password });
       const { token, user } = res.data;
+      
       localStorage.setItem("token", token);
       localStorage.removeItem("admin");
+      localStorage.setItem("user", JSON.stringify(user));
+      
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(user);
       setAdmin(null);
+      
       return res.data;
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
       throw error;
     }
-  };
+  }, []);
 
-  // Admin login - uses separate endpoint
-  const adminLogin = async (email, password) => {
-    try {
-      const res = await api.post("/auth/admin/login", { email, password });
-      const { token, admin } = res.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("admin", JSON.stringify(admin));
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setAdmin(admin);
-      setUser(null);
-      return res.data;
-    } catch (error) {
-      console.error("Admin login error:", error.response?.data || error.message);
-      throw error;
-    }
-  };
-
-  const signup = async (userData) => {
+  const signup = useCallback(async (userData) => {
     try {
       const res = await api.post("/auth/signup", userData);
       const { token, user } = res.data;
+      
       localStorage.setItem("token", token);
       localStorage.removeItem("admin");
+      localStorage.setItem("user", JSON.stringify(user));
+      
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setUser(user);
       setAdmin(null);
+      
       return res.data;
     } catch (error) {
       console.error("Signup error:", error.response?.data || error.message);
       throw error;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
+    localStorage.removeItem("user");
     delete api.defaults.headers.common["Authorization"];
     setUser(null);
     setAdmin(null);
-  };
+    console.log("✅ Logged out");
+  }, []);
 
-  const value = {
+  const isAdmin = useMemo(() => !!admin, [admin]);
+  const isAuthenticated = useMemo(() => !!user || !!admin, [user, admin]);
+
+  const value = useMemo(() => ({
     user,
     admin,
     login,
@@ -111,9 +173,9 @@ export function AuthProvider({ children }) {
     signup,
     logout,
     loading,
-    isAdmin: !!admin,
-    isAuthenticated: !!user || !!admin,
-  };
+    isAdmin,
+    isAuthenticated,
+  }), [user, admin, login, adminLogin, signup, logout, loading, isAdmin, isAuthenticated]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
