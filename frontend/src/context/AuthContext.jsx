@@ -3,7 +3,7 @@ import api from "../services/api";
 import axios from "axios"; // 👈 ADD THIS IMPORT
 
 const AuthContext = createContext(null);
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; // 👈 ADD THIS
+const API_URL = import.meta.env.VITE_API_URL || "https://avocado-web-admin-2.onrender.com/api"; // 👈 ADD THIS
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
