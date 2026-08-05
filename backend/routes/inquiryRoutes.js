@@ -4,8 +4,8 @@ const { protect, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
 
-// POST /api/inquiries - logged-in customer submits an inquiry
-router.post("/", protect, async (req, res) => {
+// POST /api/inquiries - Admin creates inquiry (user is optional)
+router.post("/", protect, adminOnly, async (req, res) => {
   try {
     const { product, name, email, phone, quantity, message } = req.body;
 
@@ -13,19 +13,33 @@ router.post("/", protect, async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
-    const inquiry = await Inquiry.create({
-      user: req.user._id,
-      product: product || undefined,
-      name: name || req.user.name,
-      email: email || req.user.email,
-      phone: phone || req.user.phone,
+    const inquiryData = {
+      name: name || req.user?.name,
+      email: email || req.user?.email,
+      phone: phone || req.user?.phone,
       quantity,
       message,
-    });
+    };
+
+    // Only add product if provided
+    if (product && product.trim() !== "") {
+      inquiryData.product = product;
+    }
+
+    // Optionally add user if you want to track who created it
+    if (req.user && req.user._id) {
+      inquiryData.user = req.user._id;
+    }
+
+    const inquiry = await Inquiry.create(inquiryData);
 
     res.status(201).json(inquiry);
   } catch (err) {
-    res.status(400).json({ message: "Could not submit inquiry", error: err.message });
+    console.error("Error creating inquiry:", err);
+    res.status(400).json({ 
+      message: "Could not submit inquiry", 
+      error: err.message 
+    });
   }
 });
 
